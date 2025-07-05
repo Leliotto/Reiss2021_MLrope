@@ -668,11 +668,38 @@ print(np.nanmin(prop_event)/np.nanmax(prop_event))
 """
 
 
+# In[17]:
+
+
+"""#Some tests...
+event_num = 5
+time_event = stb['time'][np.logical_and(stb['time'] > icme_start_time_num[n_istbind][event_num], stb['time'] < mo_start_time_num[n_istbind][event_num]+ feature_hours / 24.0)]
+prop_event = stb['bt'][np.logical_and(stb['time'] > icme_start_time_num[n_istbind][event_num], stb['time'] < mo_start_time_num[n_istbind][event_num]+ feature_hours / 24.0)]
+time_label = stb['time'][np.logical_and(stb['time'] > mo_start_time_num[n_istbind][event_num]+ feature_hours / 24.0, stb['time'] < mo_end_time_num[n_istbind][event_num])]
+prop_label = stb['bt'][np.logical_and(stb['time'] > mo_start_time_num[n_istbind][event_num]+ feature_hours / 24.0, stb['time'] < mo_end_time_num[n_istbind][event_num])]
+plt.plot(time_event,prop_event)
+plt.plot(time_label,prop_label)
+plt.scatter(icme_start_time_num[n_istbind][event_num],0.6, color='y')
+plt.axvline(icme_start_time_num[n_istbind][event_num], color='y')
+plt.scatter(mo_start_time_num[n_istbind][event_num],0.5, color='g')
+plt.scatter(mo_start_time_num[n_istbind][event_num] + feature_hours / 24.0,0.4, color='b')
+plt.scatter(mo_end_time_num[n_istbind][event_num],0.3, color='r')
+
+print(np.nanmean(prop_event))
+print(np.nanmax(prop_event))
+print(np.nanstd(prop_event))
+print(np.nanmin(prop_event))
+print(np.nanstd(prop_event)/np.nanmean(prop_event))
+print(np.nanmin(prop_event)/np.nanmax(prop_event))
+#print(np.nanmean(prop_label))stb
+"""
+
+
 # ## 2. Machine Learning
 
 # #### Split data frame into training and testing
 
-# In[17]:
+# In[18]:
 
 
 # Testing data size in percent
@@ -699,14 +726,10 @@ stb_test_ind  = stb_test.index.to_numpy()
 train_ind = train.index.to_numpy()
 test_ind = test.index.to_numpy()
 
-# Some useful stuff:
-test.info()
-# train.describe()
-
 
 # #### Feature selection
 
-# In[18]:
+# In[19]:
 
 
 # Select features
@@ -737,7 +760,7 @@ pickle.dump([n_iwinind, n_istaind, n_istbind,
 
 # #### Select algorithms for machine learning
 
-# In[19]:
+# In[20]:
 
 
 # Define machine learning models
@@ -770,7 +793,7 @@ def evaluate_forecast(model, X, y, y_predict):
 
 # #### Test different machine learning algorithms
 
-# In[20]:
+# In[21]:
 
 
 # Use pickle to load training and testing data
@@ -802,7 +825,7 @@ for name, model in models.items():
 
 # #### Validation of machine learning models
 
-# In[21]:
+# In[22]:
 
 
 # Validate machine learning model on test data
@@ -816,17 +839,16 @@ for name, model in models.items():
 
 # #### Optimising model hyperparameters
 
-# In[22]:
+# In[23]:
 
 
 # Set to True when you want to redo the Hyperparameter tuning - takes a few minutes
-# [ToDo] Need to check why the results are not improving with the tuning...
 gridsearch = False
 
 from sklearn.model_selection import RandomizedSearchCV
 
 
-# In[23]:
+# In[24]:
 
 
 if gridsearch:
@@ -858,7 +880,7 @@ cc1 = scipy.stats.pearsonr(np.squeeze(y_test), np.squeeze(y_pred1))[0]
 print("{:<10}{:6.2f}{:6.2f}".format('test', cc1, mae1))
 
 
-# In[24]:
+# In[25]:
 
 
 if gridsearch:
@@ -890,7 +912,7 @@ cc1 = scipy.stats.pearsonr(np.squeeze(y_test), np.squeeze(y_pred1))[0]
 print("{:<10}{:6.2f}{:6.2f}".format('test', cc1, mae1))
 
 
-# In[25]:
+# In[26]:
 
 
 # Select best models according to scores
@@ -903,7 +925,7 @@ y_pred2 = model2.predict(X_test)
 y_pred3 = model3.predict(X_test)
 
 
-# In[26]:
+# In[27]:
 
 
 importances = model3.feature_importances_
@@ -929,7 +951,7 @@ plt.savefig('plots/' + argv3, bbox_inches='tight')
 plt.show()
 
 
-# In[27]:
+# In[28]:
 
 
 # (n, 1) -- (n,)
@@ -941,7 +963,7 @@ y_pred3 = np.squeeze(y_pred3)
 #y_pred1 = y_pred1.reshape(-1,1)
 
 
-# In[28]:
+# In[ ]:
 
 
 # Create scatter density plots for different models
@@ -1032,7 +1054,7 @@ plt.show()
 
 # #### Point-to-point comparison metrics
 
-# In[71]:
+# In[31]:
 
 
 import sklearn
@@ -1138,37 +1160,19 @@ print('min($B_{z}$)','&','GBR','&','{:.2f}'.format(np.mean(y_pred3)),'&','{:.2f}
      '{:.2f}'.format(me3), '&', '{:.2f}'.format(mae3), '&', '{:.2f}'.format(rmse3), '&', '{:.2f}'.format(ss3), '&', '{:.2f}'.format(pcc3),'\\\\')
 
 # Save results as np array
+import os
+os.makedirs('mfr_results', exist_ok=True)
+
+# Save results as np array
 argv3='bz_{}h_error_measures'.format(feature_hours)  
 res_array = np.array([[me1, mae1, mse1, rmse1, ss1, pcc1], [me2, mae2, mse2, rmse2, ss2, pcc2], [me3, mae3, mse3, rmse3, ss3, pcc3]])
 np.save('mfr_results/' + argv3, res_array)
 np.save('mfr_results/' + 'bz_values', obs)
 
 
-# In[69]:
-
-
-from scipy import stats
-import numpy as np
-
-x = y_pred1
-y = obs
-
-
-
-print("r-value:", r_value)
-print("r-squared:", r_value**2)
-print("p_value:", p_value)
-
-
-# In[48]:
-
-
-
-
-
 # #### Binary metrics
 
-# In[30]:
+# In[32]:
 
 
 # 2. Binary Metrics 
@@ -1275,33 +1279,27 @@ res_array = np.array([ct1+[tpr1, fpr1, ts1, tss1, bs1], ct2+[tpr2, fpr2, ts2, ts
 np.save('mfr_results/' + argv3, res_array)
 
 
-# In[ ]:
-
-
-
-
-
 # #### Illustrate the effect of time window on the results
 
-# In[31]:
+# In[43]:
 
 
 d_metrics_mae = {'lr': [], 'rfr': [], 'gbr': []}
 d_metrics_pcc = {'lr': [], 'rfr': [], 'gbr': []}
 
-th_list = np.arange(0, 16)
+th_list = [4]  # solo 4h disponibile
 for idx in th_list:
-    [res_lr,res_rfr,res_gbr] = np.load('mfr_results/bz_{}h_error_measures.npy'.format(idx))
+    [res_lr, res_rfr, res_gbr] = np.load('mfr_results/bz_{}h_error_measures.npy'.format(idx), allow_pickle=True)
     # me=[0], mae=[1], mse=[2], rmse=[3], ss=[4], pcc=[5]
     d_metrics_mae['lr'].append(res_lr[1])
     d_metrics_mae['rfr'].append(res_rfr[1])
     d_metrics_mae['gbr'].append(res_gbr[1])
-    
+
     d_metrics_pcc['lr'].append(res_lr[5])
     d_metrics_pcc['rfr'].append(res_rfr[5])
     d_metrics_pcc['gbr'].append(res_gbr[5])
-    
-fig, [ax1,ax2] = plt.subplots(1, 2,figsize=(16,4))
+
+fig, [ax1, ax2] = plt.subplots(1, 2, figsize=(16, 4))
 
 #ax1.plot(th_list, d_metrics_mae['lr'], color='red', label='LR', marker='.')
 ax1.plot(th_list, d_metrics_mae['rfr'], color='steelblue', label='RFR', marker='.')
@@ -1311,16 +1309,16 @@ ax1.set_ylabel('MAE for min(B$_{\mathrm{z}}$) prediction [nT]', fontsize=14)
 ax1.xaxis.set_major_locator(MultipleLocator(1))
 ax1.yaxis.set_major_locator(MultipleLocator(0.2))
 ax1.set_title('min(B$_{\mathrm{z}}$)')
-ax1.legend(loc=3,fontsize=16)
+ax1.legend(loc=3, fontsize=16)
 
 #ax2.plot(th_list, d_metrics_pcc['lr'], color='red', label='LR', marker='.')
 ax2.plot(th_list, d_metrics_pcc['rfr'], color='steelblue', label='RFR', marker='.')
 ax2.plot(th_list, d_metrics_pcc['gbr'], color='green', label='GBR', marker='.')
 ax2.set_xlabel('Time elapsed from MO start [h]', fontsize=14)
 ax2.set_ylabel('PCC for min(B$_{\mathrm{z}}$) prediction [nT]', fontsize=14)
-ax2.set_ylim([0.55,0.90])
-ax1.set_ylim([2.3,3.8])
-ax2.legend(loc=4,fontsize=16)
+ax2.set_ylim([0.55, 0.90])
+ax1.set_ylim([2.3, 3.8])
+ax2.legend(loc=4, fontsize=16)
 ax2.set_title('min(B$_{\mathrm{z}}$)')
 plt.subplots_adjust(wspace=0.3)
 
@@ -1332,66 +1330,15 @@ plt.subplots_adjust(wspace=0.25)
 for ax, ann in zip([ax1, ax2], ['a', 'b']):
     ax.text(-.17, .97, ann, transform=ax.transAxes, fontsize=22, weight='bold')
 
-argv3='time_window_minbz_{}h.pdf'.format(feature_hours)  
+feature_hours = 4
+argv3 = 'time_window_minbz_{}h.pdf'.format(feature_hours)
 plt.savefig('plots/' + argv3, bbox_inches='tight')
-plt.show()
-
-
-# In[87]:
-
-
-# Compute ROC curve
-ax=plt.figure(figsize=(20,8),dpi=100)
-idx = 0
-
-tpr_arr1 = np.zeros(2000)
-tpr_arr2 = np.zeros(2000)
-tpr_arr3 = np.zeros(2000)
-
-fpr_arr1 = np.zeros(2000)
-fpr_arr2 = np.zeros(2000)
-fpr_arr3 = np.zeros(2000)
-
-for threshold in np.arange(0, -20, -0.25):
-    ct1 = contingencyTable(y_pred1,obs,threshold)
-    ct2 = contingencyTable(y_pred2,obs,threshold)
-    ct3 = contingencyTable(y_pred3,obs,threshold)
-    
-    tpr_arr1[idx] = truePostiveRate(ct1)
-    tpr_arr2[idx] = truePostiveRate(ct2)
-    tpr_arr3[idx] = truePostiveRate(ct3)
-    
-    fpr_arr1[idx] = falsePostiveRate(ct1)
-    fpr_arr2[idx] = falsePostiveRate(ct2)
-    fpr_arr3[idx] = falsePostiveRate(ct3)
-    idx = idx + 1
-   
-vals1 = np.array([tpr_arr1, fpr_arr1])
-vals2 = np.array([tpr_arr2, fpr_arr2])
-vals3 = np.array([tpr_arr3, fpr_arr3])
-
-test1 = np.sort(vals1, axis=1)
-test2 = np.sort(vals2, axis=1)
-test3 = np.sort(vals3, axis=1)
-
-fig, ax1 = plt.subplots(1, figsize=(5,5))
-plt.title('Receiver Operating Characteristic')
-ax1.plot(test1[1,:], test1[0,:], color='coral', label='LR')
-ax1.plot(test2[1,:], test2[0,:], color='steelblue', label='RFR')
-ax1.plot(test3[1,:], test3[0,:], color='green', label='GBR')
-ax1.legend(loc=4,fontsize=12)
-ax1.plot([0, 1], ls="-.", color='gray')
-ax1.yaxis.set_major_locator(MultipleLocator(0.25))
-ax1.xaxis.set_major_locator(MultipleLocator(0.25))
-
-plt.ylabel('True Positive Rate')
-plt.xlabel('False Positive Rate')
 plt.show()
 
 
 # ## 3. Real-world Applications
 
-# In[34]:
+# In[44]:
 
 
 from matplotlib.dates import DateFormatter
@@ -1447,29 +1394,29 @@ def plot_all_mos(sat, n_ind, start_range, end_range, satname, varstr='min'):
     plt.show()
 
 
-# In[49]:
+# In[42]:
 
 
 #Ideal example
-#y_pred = y_pred3
-#plot_all_mos(win, n_iwinind, 2, 3, 'Wind')
+y_pred = y_pred3
+plot_all_mos(win, n_iwinind, 2, 3, 'Wind')
 
 
-# In[50]:
+# In[45]:
 
 
 #Average example
-#plot_all_mos(win, n_iwinind, 0, 1, 'Wind')
+plot_all_mos(win, n_iwinind, 0, 1, 'Wind')
 
 
-# In[51]:
+# In[46]:
 
 
 #Poor example
-#plot_all_mos(win, n_iwinind, 17, 18, 'Wind')
+plot_all_mos(win, n_iwinind, 17, 18, 'Wind')
 
 
-# In[34]:
+# In[ ]:
 
 
 #y_pred = y_pred2
@@ -1479,259 +1426,4 @@ def plot_all_mos(sat, n_ind, start_range, end_range, satname, varstr='min'):
 #plot_all_mos(sta, n_istaind, start_range, end_range, 'STEREO-A')
 #start_range, end_range = len(win_test_ind) + len(sta_test_ind), len(test_ind)
 #plot_all_mos(stb, n_istbind, start_range, end_range, 'STEREO-B')
-
-
-# #### Compute "best-case" warning time
-
-# In[231]:
-
-
-# Compute best-case warning time for Wind events
-
-from matplotlib.dates import DateFormatter
-
-buffer_win = 0
-start_range, end_range = 0, np.size(win_test_ind)
-warningTimesWind = []
-
-for event_num in range(start_range,end_range):
-    # Compute event properties
-    ind = n_iwinind[test_ind[event_num]] # be careful with this!
-    istart = np.where(win['time'] >= icme_start_time_num[ind] - buffer_win/24.)[0][0]
-    iend = np.where(win['time'] >= mo_end_time_num[ind] + buffer_win/24.)[0][0]
-
-    icmestart = np.where(win['time'] >= icme_start_time_num[ind])[0][0]
-    mostart = np.where(win['time'] >= mo_start_time_num[ind])[0][0]
-    mostart_fh = np.where(win['time'] >= mo_start_time_num[ind] + feature_hours/24.)[0][0]
-    moend = np.where(win['time'] >= mo_end_time_num[ind])[0][0]
-
-    larr = len(win['time'][int(mostart):int(moend)])
-    predVal = np.zeros(larr)
-    yObs = np.zeros(larr)
-    predVal[:] = y_pred3[event_num]
-    yObs[:] = obs[event_num]
-
-    # Compute peak value and peak time
-    bzMinPeak = min(win['bz'][int(mostart):int(moend)])
-    tMinPeak = win['time'][np.where(win['bz'] == bzMinPeak)]
-
-    # Compute time difference between end of sheath and where min(Bz) occurs
-    warningTime = (tMinPeak - win['time'][int(mostart)])*24
-    warningTimesWind.append(warningTime) 
-
-    '''# Plot results
-    plt.figure(figsize=(15, 4))
-    plt.plot(win['time'][int(istart):int(iend)], win['bz'][int(istart):int(iend)])
-    plt.axvline(x=win['time'][int(icmestart)], color='g', linestyle='--')
-    plt.axvline(x=win['time'][int(mostart)], color='r', linestyle='--')
-    plt.axvline(x=win['time'][int(mostart_fh)], color='g', linestyle='--')
-    plt.axvline(x=win['time'][int(moend)], color='r', linestyle='--')
-    plt.plot(win['time'][int(mostart):int(moend)], predVal, 'r-', label='prediction')
-    plt.plot(win['time'][int(mostart):int(moend)], yObs, 'b-', label='observation')
-    #plt.xlim(win['time'][int(mostart)]-1, win['time'][int(mostart)]+3)
-    plt.scatter(tMinPeak,bzMinPeak)
-    ax = plt.gca()
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d\n%H:%M'))
-    '''
-
-
-# In[206]:
-
-
-# Compute best-case warning time for STEREO-A events
-
-start_range, end_range = len(win_test_ind), len(win_test_ind) + len(sta_test_ind)
-warningTimesSTA = []
-
-for event_num in range(start_range,end_range):
-    # Compute event properties
-    ind = n_istaind[test_ind[event_num]] # be careful with this!
-    istart = np.where(sta['time'] >= icme_start_time_num[ind] - buffer_win/24.)[0][0]
-    iend = np.where(sta['time'] >= mo_end_time_num[ind] + buffer_win/24.)[0][0]
-
-    icmestart = np.where(sta['time'] >= icme_start_time_num[ind])[0][0]
-    mostart = np.where(sta['time'] >= mo_start_time_num[ind])[0][0]
-    mostart_fh = np.where(sta['time'] >= mo_start_time_num[ind] + feature_hours/24.)[0][0]
-    moend = np.where(sta['time'] >= mo_end_time_num[ind])[0][0]
-
-    larr = len(sta['time'][int(mostart):int(moend)])
-    predVal = np.zeros(larr)
-    yObs = np.zeros(larr)
-    predVal[:] = y_pred3[event_num]
-    yObs[:] = obs[event_num]
-
-    # Compute peak value and peak time
-    bzMinPeak = min(sta['bz'][int(mostart):int(moend)])
-    tMinPeak = sta['time'][np.where(sta['bz'] == bzMinPeak)]
-
-    # Compute time difference between end of sheath and where min(Bz) occurs
-    warningTime = (tMinPeak - sta['time'][int(mostart)])*24
-    warningTimesSTA.append(warningTime) 
-
-    '''
-    # Plot results
-    plt.figure(figsize=(15, 4))
-    plt.plot(sta['time'][int(istart):int(iend)], sta['bz'][int(istart):int(iend)])
-    plt.axvline(x=sta['time'][int(icmestart)], color='g', linestyle='--')
-    plt.axvline(x=sta['time'][int(mostart)], color='r', linestyle='--')
-    plt.axvline(x=sta['time'][int(mostart_fh)], color='g', linestyle='--')
-    plt.axvline(x=sta['time'][int(moend)], color='r', linestyle='--')
-    plt.plot(sta['time'][int(mostart):int(moend)], predVal, 'r-', label='prediction')
-    plt.plot(sta['time'][int(mostart):int(moend)], yObs, 'b-', label='observation')
-    #plt.xlim(sta['time'][int(mostart)]-1, sta['time'][int(mostart)]+3)
-    plt.scatter(tMinPeak,bzMinPeak)
-    ax = plt.gca()
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d\n%H:%M'))
-    '''
-
-
-# In[228]:
-
-
-# Compute best-case warning time for STEREO-B events
-
-start_range, end_range = len(win_test_ind) + len(sta_test_ind), len(test_ind)
-warningTimesSTB = []
-
-for event_num in range(start_range,end_range):
-    # Compute event properties
-    ind = n_istbind[test_ind[event_num]] # be careful with this!
-    istart = np.where(stb['time'] >= icme_start_time_num[ind] - buffer_win/24.)[0][0]
-    iend = np.where(stb['time'] >= mo_end_time_num[ind] + buffer_win/24.)[0][0]
-
-    icmestart = np.where(stb['time'] >= icme_start_time_num[ind])[0][0]
-    mostart = np.where(stb['time'] >= mo_start_time_num[ind])[0][0]
-    mostart_fh = np.where(stb['time'] >= mo_start_time_num[ind] + feature_hours/24.)[0][0]
-    moend = np.where(stb['time'] >= mo_end_time_num[ind])[0][0]
-
-    larr = len(stb['time'][int(mostart):int(moend)])
-    predVal = np.zeros(larr)
-    yObs = np.zeros(larr)
-    predVal[:] = y_pred3[event_num]
-    yObs[:] = obs[event_num]
-
-    # Compute peak value and peak time
-    bzMinPeak = min(stb['bz'][int(mostart):int(moend)])
-    tMinPeak = stb['time'][np.where(stb['bz'] == bzMinPeak)]
-
-    # Compute time difference between end of sheath and where min(Bz) occurs
-    warningTime = (tMinPeak - stb['time'][int(mostart)])*24
-    warningTimesSTB.append(warningTime) 
-
-    '''
-    # Plot results
-    plt.figure(figsize=(15, 4))
-    plt.plot(stb['time'][int(istart):int(iend)], stb['bz'][int(istart):int(iend)])
-    plt.axvline(x=stb['time'][int(icmestart)], color='g', linestyle='--')
-    plt.axvline(x=stb['time'][int(mostart)], color='r', linestyle='--')
-    plt.axvline(x=stb['time'][int(mostart_fh)], color='g', linestyle='--')
-    plt.axvline(x=stb['time'][int(moend)], color='r', linestyle='--')
-    plt.plot(stb['time'][int(mostart):int(moend)], predVal, 'r-', label='prediction')
-    plt.plot(stb['time'][int(mostart):int(moend)], yObs, 'b-', label='observation')
-    #plt.xlim(stb['time'][int(mostart)]-1, sta['time'][int(mostart)]+3)
-    plt.scatter(tMinPeak,bzMinPeak)
-    ax = plt.gca()
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d\n%H:%M'))
-    '''
-
-
-# In[260]:
-
-
-# Compute the average warning time 
-warningTimes = np.vstack([np.array(warningTimesWind),np.array(warningTimesSTA),np.array(warningTimesSTB)])
-sns.histplot(warningTimes)
-
-print(np.min(warningTimes))
-print(np.max(warningTimes))
-print(np.mean(warningTimes))
-print(np.median(warningTimes))
-
-
-# In[259]:
-
-
-min(warningTimes)
-
-
-# #### Study the effect of the solar cycle on the predictions
-
-# In[165]:
-
-
-fig, [ax1,ax2,ax3] = plt.subplots(3, 1,figsize=(12,12))
-
-ax1 = plt.subplot(312) 
-start_range, end_range = 0, np.size(win_test_ind)
-ax1 = sns.histplot(icme_start_time_num[n_iwinind[test_ind[start_range:end_range]]],color='steelblue',kde=True, binrange = [icme_start_time_num[-1],icme_start_time_num[0]], binwidth = 365, label = 'Wind')
-start_range, end_range = len(win_test_ind), len(win_test_ind) + len(sta_test_ind)
-ax1 = sns.histplot(icme_start_time_num[n_istaind[test_ind[start_range:end_range]]],color='red',kde=True, binrange = [icme_start_time_num[-1],icme_start_time_num[0]], binwidth = 365, label = 'STEREO-A')
-start_range, end_range = len(win_test_ind) + len(sta_test_ind), len(test_ind)
-ax1 = sns.histplot(icme_start_time_num[n_istbind[test_ind[start_range:end_range]]],color='green',kde=True, binrange = [icme_start_time_num[-1],icme_start_time_num[0]], binwidth = 365, label = 'STEREO-B')
-
-ax1.set_ylabel('Number of ICMEs')
-plt.legend(loc=1,fontsize=fs)
-
-plt.xlim(icme_start_time_num[-1],icme_start_time_num[0])
-ax1.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
-
-ax2 = plt.subplot(313) 
-
-start_range, end_range = 0, np.size(win_test_ind)
-plt.scatter(icme_start_time_num[n_iwinind[test_ind[start_range:end_range]]], abs(y_pred2[start_range:end_range]-obs[start_range:end_range]),color='steelblue', label = 'Wind')
-start_range, end_range = len(win_test_ind), len(win_test_ind) + len(sta_test_ind)
-plt.scatter(icme_start_time_num[n_istaind[test_ind[start_range:end_range]]], abs(y_pred2[start_range:end_range]-obs[start_range:end_range]),color='red', label = 'STEREO-A')
-start_range, end_range = len(win_test_ind) + len(sta_test_ind), len(test_ind)
-plt.scatter(icme_start_time_num[n_istbind[test_ind[start_range:end_range]]], abs(y_pred2[start_range:end_range]-obs[start_range:end_range]),color='green', label = 'STEREO-B')
-
-ax2.set_ylabel('Absolute Error [nT]')
-ax2.legend(loc=1,fontsize=fs)
-
-ax2.set_xlim(icme_start_time_num[-1],icme_start_time_num[0])
-ax2.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
-
-
-ax3 = plt.subplot(311) 
-sn_daily = pd.read_csv('data/SN_d_tot_V2.0.csv', delimiter = ';')
-sn_monthly = pd.read_csv('data/SN_m_tot_V2.0.csv', delimiter = ';')
-
-from datetime import timedelta
-sn_dates_daily = sn_daily['1818.001'].to_numpy()
-sn_dates_daily
-sn_dates_dt_daily = [datetime(int(x),1,1) + timedelta(days=(x-int(x))*365) for x in sn_dates_daily]
-sn_dates_mpl_daily = np.array([date2num(x) for x in sn_dates_dt_daily])
-
-ax3.plot(sn_dates_mpl_daily, sn_daily['  -1'], color='gray', label='Daily total sunspot number')
-ax3.set_xlim(icme_start_time_num[-1],icme_start_time_num[0])
-
-ax3.set_ylabel('Daily Sunspot Number')
-ax3.legend(loc=1,fontsize=fs)
-ax3.set_ylim(0,300)
-ax3.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
-
-
-# #### Study the 10 most severe events
-
-# In[128]:
-
-
-obs[np.where(obs<-13.93)]
-
-
-# In[129]:
-
-
-y_pred1[np.where(obs<-13.93)] #TP=8, FN=7
-
-
-# In[130]:
-
-
-y_pred2[np.where(obs<-13.93)] #TP=9, FN=6
-
-
-# In[126]:
-
-
-y_pred3[np.where(obs<-13.93)] #TP=10, FN=5
 

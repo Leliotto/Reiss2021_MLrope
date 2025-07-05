@@ -485,7 +485,7 @@ print(np.nanmin(prop_event)/np.nanmax(prop_event))
 
 # #### Split data frame into training and testing
 
-# In[14]:
+# In[13]:
 
 
 # Testing data size in percent
@@ -519,7 +519,7 @@ test_ind = test.index.to_numpy()
 
 # #### Feature selection
 
-# In[15]:
+# In[14]:
 
 
 # Select features
@@ -550,7 +550,7 @@ pickle.dump([n_iwinind, n_istaind, n_istbind,
 
 # #### Select algorithms for machine learning
 
-# In[16]:
+# In[15]:
 
 
 # Define machine learning models
@@ -583,7 +583,7 @@ def evaluate_forecast(model, X, y, y_predict):
 
 # #### Test different machine learning algorithms
 
-# In[17]:
+# In[16]:
 
 
 # Use pickle to load training and testing data
@@ -615,7 +615,7 @@ for name, model in models.items():
 
 # #### Validation of machine learning models
 
-# In[18]:
+# In[17]:
 
 
 # Validate machine learning model on test data
@@ -629,7 +629,7 @@ for name, model in models.items():
 
 # #### Optimising model hyperparameters
 
-# In[19]:
+# In[18]:
 
 
 # Set to True when you want to redo the Hyperparameter tuning - takes a few minutes
@@ -638,7 +638,7 @@ gridsearch = False
 from sklearn.model_selection import RandomizedSearchCV
 
 
-# In[20]:
+# In[19]:
 
 
 if gridsearch:
@@ -670,7 +670,7 @@ cc1 = scipy.stats.pearsonr(np.squeeze(y_test), np.squeeze(y_pred1))[0]
 print("{:<10}{:6.2f}{:6.2f}".format('test', cc1, mae1))
 
 
-# In[21]:
+# In[20]:
 
 
 if gridsearch:
@@ -702,7 +702,7 @@ cc1 = scipy.stats.pearsonr(np.squeeze(y_test), np.squeeze(y_pred1))[0]
 print("{:<10}{:6.2f}{:6.2f}".format('test', cc1, mae1))
 
 
-# In[22]:
+# In[21]:
 
 
 # Select best models according to scores
@@ -715,7 +715,7 @@ y_pred2 = model2.predict(X_test)
 y_pred3 = model3.predict(X_test)
 
 
-# In[23]:
+# In[22]:
 
 
 sns.set_context("talk")     
@@ -743,7 +743,7 @@ plt.savefig('plots/' + argv3, bbox_inches='tight')
 plt.show()
 
 
-# In[24]:
+# In[23]:
 
 
 # (n, 1) -- (n,)
@@ -755,7 +755,7 @@ y_pred3 = np.squeeze(y_pred3)
 #y_pred1 = y_pred1.reshape(-1,1)
 
 
-# In[25]:
+# In[24]:
 
 
 # Create scatter density plots for different models
@@ -845,7 +845,7 @@ plt.show()
 
 # #### Point-to-point comparison metrics
 
-# In[39]:
+# In[25]:
 
 
 import sklearn
@@ -959,7 +959,7 @@ np.save('mfr_results/' + 'bz_values', obs)
 
 # #### Binary metrics
 
-# In[27]:
+# In[26]:
 
 
 # 2. Binary Metrics 
@@ -1068,54 +1068,45 @@ np.save('mfr_results/' + argv3, res_array)
 
 # #### Illustrate the effect of time window on the results
 
-# In[37]:
+# In[29]:
 
 
 d_metrics_mae = {'lr': [], 'rfr': [], 'gbr': []}
 d_metrics_pcc = {'lr': [], 'rfr': [], 'gbr': []}
 
-th_list  = np.arange(0, 16)
-valid_th = []
-
+th_list = np.arange(0, 16)
 for idx in th_list:
-    # NB: per Bt i file si chiamano *_binary_measures.npy
-    filename = f"mfr_results/btot_{idx}h_binary_measures.npy"
-    try:
-        [res_lr, res_rfr, res_gbr] = np.load(filename, allow_pickle=True)
-        # me=[0], mae=[1], mse=[2], rmse=[3], ss=[4], pcc=[5]
-        d_metrics_mae['lr'].append(res_lr[1])
-        d_metrics_mae['rfr'].append(res_rfr[1])
-        d_metrics_mae['gbr'].append(res_gbr[1])
+    [res_lr,res_rfr,res_gbr] = np.load('mfr_results/btot_{}h_error_measures.npy'.format(idx))
+    # me=[0], mae=[1], mse=[2], rmse=[3], ss=[4], pcc=[5]
+    d_metrics_mae['lr'].append(res_lr[1])
+    d_metrics_mae['rfr'].append(res_rfr[1])
+    d_metrics_mae['gbr'].append(res_gbr[1])
+    
+    d_metrics_pcc['lr'].append(res_lr[5])
+    d_metrics_pcc['rfr'].append(res_rfr[5])
+    d_metrics_pcc['gbr'].append(res_gbr[5])
+    
+fig, [ax1,ax2] = plt.subplots(1, 2,figsize=(16,4))
 
-        d_metrics_pcc['lr'].append(res_lr[5])
-        d_metrics_pcc['rfr'].append(res_rfr[5])
-        d_metrics_pcc['gbr'].append(res_gbr[5])
-
-        valid_th.append(idx)
-    except FileNotFoundError:
-        print(f"File not found: {filename} – skipping.")
-
-fig, [ax1, ax2] = plt.subplots(1, 2, figsize=(16, 4))
-
-#ax1.plot(valid_th, d_metrics_mae['lr'], color='red', label='LR', marker='.')
-ax1.plot(valid_th, d_metrics_mae['rfr'], color='steelblue', label='RFR', marker='.')
-ax1.plot(valid_th, d_metrics_mae['gbr'], color='green', label='GBR', marker='.')
+#ax1.plot(th_list, d_metrics_mae['lr'], color='red', label='LR', marker='.')
+ax1.plot(th_list, d_metrics_mae['rfr'], color='steelblue', label='RFR', marker='.')
+ax1.plot(th_list, d_metrics_mae['gbr'], color='green', label='GBR', marker='.')
 ax1.set_xlabel('Time elapsed from MO start [h]', fontsize=14)
-ax1.set_ylabel('MAE for max(B$_{\\mathrm{t}}$) prediction [nT]', fontsize=14)
+ax1.set_ylabel('MAE for max(B$_{\mathrm{t}}$) prediction [nT]', fontsize=14)
 ax1.xaxis.set_major_locator(MultipleLocator(1))
 ax1.yaxis.set_major_locator(MultipleLocator(0.2))
-ax1.set_title('max(B$_{\\mathrm{t}}$)')
-ax1.legend(loc=1, fontsize=16)
+ax1.set_title('max(B$_{\mathrm{t}}$)')
+ax1.legend(loc=1,fontsize=16)
 
-#ax2.plot(valid_th, d_metrics_pcc['lr'], color='red', label='LR', marker='.')
-ax2.plot(valid_th, d_metrics_pcc['rfr'], color='steelblue', label='RFR', marker='.')
-ax2.plot(valid_th, d_metrics_pcc['gbr'], color='green', label='GBR', marker='.')
+#ax2.plot(th_list, d_metrics_pcc['lr'], color='red', label='LR', marker='.')
+ax2.plot(th_list, d_metrics_pcc['rfr'], color='steelblue', label='RFR', marker='.')
+ax2.plot(th_list, d_metrics_pcc['gbr'], color='green', label='GBR', marker='.')
 ax2.set_xlabel('Time elapsed from MO start [h]', fontsize=14)
-ax2.set_ylabel('PCC for max(B$_{\\mathrm{t}}$) prediction [nT]', fontsize=14)
-ax2.set_ylim([0.7, 0.95])
-ax1.set_ylim([2.0, 3.6])
-ax2.legend(loc=4, fontsize=16)
-ax2.set_title('max(B$_{\\mathrm{t}}$)')
+ax2.set_ylabel('PCC for max(B$_{\mathrm{t}}$) prediction [nT]', fontsize=14)
+ax2.set_ylim([0.7,0.95])
+ax1.set_ylim([2.0,3.6])
+ax2.legend(loc=4,fontsize=16)
+ax2.set_title('max(B$_{\mathrm{t}}$)')
 plt.subplots_adjust(wspace=0.3)
 
 # Change major ticks
@@ -1126,14 +1117,14 @@ plt.subplots_adjust(wspace=0.25)
 for ax, ann in zip([ax1, ax2], ['c', 'd']):
     ax.text(-.17, .97, ann, transform=ax.transAxes, fontsize=22, weight='bold')
 
-argv3 = f'time_window_maxbt_{feature_hours}h.pdf'
+argv3='time_window_maxbt_{}h.pdf'.format(feature_hours)  
 plt.savefig('plots/' + argv3, bbox_inches='tight')
 plt.show()
 
 
 # ## 3. Real-world Applications
 
-# In[33]:
+# In[30]:
 
 
 from matplotlib.dates import DateFormatter
@@ -1187,14 +1178,14 @@ def plot_all_mos(sat, n_ind, start_range, end_range, satname, varstr='max'):
     plt.show()
 
 
-# In[34]:
+# In[32]:
 
 
-y_pred = y_pred3
-plot_all_mos(win, n_iwinind, 17, 20, 'Wind')
+#y_pred = y_pred3
+#plot_all_mos(win, n_iwinind, 17, 20, 'Wind')
 
 
-# In[36]:
+# In[32]:
 
 
 #y_pred = y_pred3
